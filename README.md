@@ -1,4 +1,4 @@
-# HIT 137 Group Assignment 2
+# HIT 137 Assignment 2
 
 Group 2
 
