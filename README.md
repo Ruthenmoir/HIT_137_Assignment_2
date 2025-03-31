@@ -1,1 +1,9 @@
-# HIT_137_Assignment_2
+# HIT 137 Group Assignment 2
+
+Group 2 
+Member 1: Graham Ruthenberg
+Member 2: Bailey Lange
+Member 3: Truyen Bui
+Member 4: Kevin Flynn
+
+
