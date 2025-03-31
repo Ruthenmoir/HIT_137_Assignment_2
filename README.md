@@ -1,6 +1,7 @@
 # HIT 137 Group Assignment 2
 
-Group 2 
+Group 2
+
 Member 1: Graham Ruthenberg
 
 Member 2: Bailey Lange
