@@ -1,6 +1,7 @@
-import csv
+import csv    #needed to read csv files
+import os     # needed to access multiple files in folder
 
-#Calculate the average temperatures for each season across all years. Save the result to file “average_temp.txt”
+"""Aim: Calculate the average temperatures for each season across all years. Save the result to file “average_temp.txt"""
 
 def find_season(month_name):    #seasons based off months listed in cvs table
     if month_name in ['December', 'January', 'February']:
@@ -24,10 +25,17 @@ def process_temperature_data(filenames):
         "Winter": {"sum_of_temp": 0, "count": 0},
         "Spring": {"sum_of_temp": 0, "count": 0}
     }
+    try: 
+        filenames = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
 
+    except FileNotFoundError: 
+        print(f"Folder not found: {folder_path}")
+        return None
+    
     for filename in filenames:
+        full_path = os.path.join(folder_path, filename)
         try:
-            with open(filename, 'r') as file:
+            with open(full_path, 'r') as file:
                 reader = csv.DictReader(file)
 
                 for row in reader:
@@ -47,7 +55,7 @@ def process_temperature_data(filenames):
                             continue
 
         except FileNotFoundError:
-            print(f"File not found: {filename}")
+            print(f"File not found: {full_path}")
             continue
 
 
@@ -68,13 +76,10 @@ def results(averages, output_file):                                        #savi
         
 def main():
     output_file = "average_temp.txt"
+    filenames = "C:\Users\ruthe\OneDrive\Desktop\Graham Uni\137 Software Now\Assignment 2\temperature_data"
 
-    filenames = [
-        "stations_group_1988.csv",
-        "stations_group_1989.csv"
-    ]
     try:
-        seasonal_averages = process_temperature_data(filenames)
+        seasonal_averages = process_temperature_data(folder_path)
         results(seasonal_averages, output_file)
         print(f"Results saved to {output_file}")
 
