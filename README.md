@@ -1,6 +1,4 @@
-# HIT 137 Assignment 2
-
-Group 2
+# HIT 137 Group 2
 
 Member 1: Graham Ruthenberg
 
