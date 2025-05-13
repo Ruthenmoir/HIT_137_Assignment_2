@@ -1,9 +1,7 @@
-"""We used the video series from Codemy.com as a tutorial https://www.youtube.com/playlist?list=PLCC34OHNcOtoC6GglhF3ncJ5rLwQrLGnV  """
-
-
-
-
-
+"""We used the following video series from youtube as tutorials:
+ https://www.youtube.com/playlist?list=PLCC34OHNcOtoC6GglhF3ncJ5rLwQrLGnV
+ https://www.youtube.com/playlist?list=PLpMixYKO4EXeaGnqT_YWx7_mA77bz2VqM
+ """
 
 from tkinter import *
 from tkinter import filedialog, simpledialog
