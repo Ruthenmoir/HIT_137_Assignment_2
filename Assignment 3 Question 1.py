@@ -1,3 +1,8 @@
+"""We used the following video series from youtube as tutorials:
+ https://www.youtube.com/playlist?list=PLCC34OHNcOtoC6GglhF3ncJ5rLwQrLGnV
+ https://www.youtube.com/playlist?list=PLpMixYKO4EXeaGnqT_YWx7_mA77bz2VqM
+ """
+
 from tkinter import *
 from tkinter import filedialog, simpledialog
 from PIL import Image, ImageTk
@@ -29,6 +34,7 @@ class image_manager:
         self.history = []
         self.history_index = -1
         self.initial_image = None
+        self.displayed_image_size = None
 
     def open_image(self):
         """Opens an image file and displays it on the canvas.
@@ -359,6 +365,26 @@ class image_manager:
             new_height = int(image_height * scale)
             image = image.resize((new_width, new_height), Image.LANCZOS)
         return ImageTk.PhotoImage(image)
+    
+    def convert_to_grayscale(self):
+        """Converts the current image to grayscale."""
+        if self.original_image:
+            try:
+                self.save_to_history()
+                # Convert to grayscale using PIL
+                self.original_image = self.original_image.convert('L')
+                # Update display (resize to fit canvas if needed)
+                orig_width, orig_height = self.original_image.size
+                new_width = min(1000, orig_width)
+                new_height = int((new_width / orig_width) * orig_height)
+                display_image = self.original_image.resize((new_width, new_height), Image.LANCZOS)
+                self.display_image(display_image)
+                self.status_label.config(text="Image converted to grayscale")
+            except Exception as e:
+                self.status_label.config(text=f"Error converting to grayscale: {e}")
+        else:
+            self.status_label.config(text="No image loaded")
+
 
 
 
@@ -433,33 +459,42 @@ class gui:
         edit_menu.add_command(label="Reset Image", accelerator="Ctrl+Shift+R", command=self.image_mgr.reset_image)  
         edit_menu.add_command(label="Crop Image", accelerator="Ctrl+C",  command=self.image_mgr.start_crop)   
         edit_menu.add_command(label="Resize Image", accelerator="Ctrl+R", command=self.image_mgr.prompt_resize)   
+        edit_menu.add_command(label="Grayscale", accelerator="Ctrl+G", command=self.image_mgr.convert_to_grayscale)
 
     def create_toolbar(self):
         """Creates the toolbar with buttons and resize sliders."""
-        toolbar = Frame(self.main_frame, bg="#f0f0f0", bd=1, relief=GROOVE)
-        toolbar.pack(side=LEFT, fill=Y, padx=5, pady=5)
+        toolbar = Frame(self.main_frame, bg="#f0f0f0", bd=1, relief=GROOVE, width=220)
+        toolbar.pack(side=RIGHT, fill=Y, padx=5, pady=5)
+
+    
 
         #Button style
-        button_style = {"bg": "#d3d3d3", "fg": "#333333", "relief": FLAT, "padx": 5, "pady": 5, "width": 10, "font": ("Helvetica", 10)}
+        button_style = {"bg": "#d3d3d3", "relief": FLAT, "padx": 10, "pady": 8, "width": 14, "font": ("Helvetica", 12)}
 
-        #Buttons
-        opentbutton = Button(toolbar, text="Open", command=self.image_mgr.open_image, **button_style)
-        opentbutton.pack(pady=2)
-        savebutton= Button(toolbar, text="Save", command= self.image_mgr.save_file, **button_style)
-        savebutton.pack(pady=2)
-        undobutton= Button(toolbar, text="Undo", command=self.image_mgr.undo, **button_style)
-        undobutton.pack(pady=2)
-        redobutton= Button(toolbar, text="Redo", command=self.image_mgr.redo, **button_style)
-        redobutton.pack(pady=2)
-        cropbutton= Button(toolbar, text="Crop", command=self.image_mgr.start_crop, **button_style)
-        cropbutton.pack(pady=2)
+
+      # Button configurations: (text_color, text, command)
+        button_configs = [
+            ("#0066CC", "Open", self.image_mgr.open_image),  # Blue for Open
+            ("#009900", "Save", self.image_mgr.save_file),    # Green for Save
+            ("#FF6600", "Undo", self.image_mgr.undo),         # Orange for Undo
+            ("#CC9900", "Redo", self.image_mgr.redo),         # Yellow for Redo
+            ("#CC0000", "Crop", self.image_mgr.start_crop),  # Red for Crop
+            ("#666666", "Grayscale", self.image_mgr.convert_to_grayscale),  # Gray for Grayscale
+            ("#660099", "Help", self.show_help),             # Purple for Help
+            ]
+
+        # Create buttons with colored icons
+        for text_color, text, command in button_configs:
+            row_frame = Frame(toolbar, bg="#f0f0f0")  
+            row_frame.pack(pady=4, anchor="center")  
+            Button(row_frame, text=text, command=command, fg=text_color, **button_style).pack(side=LEFT, padx=10)
 
        # Separator for visual clarity
         separator = Frame(toolbar, height=2, bg="#d3d3d3")
         separator.pack(fill=X, pady=5)
 
        # Resize Controls label
-        Label(toolbar, text="Resize Controls", bg="#f0f0f0", font=("Helvetica", 10, "bold")).pack(pady=5)
+        Label(toolbar, text="Resize Controls", bg="#f0f0f0", font=("Helvetica", 12, "bold")).pack(pady=8)
 
         # Height slider
         height_frame = Frame(toolbar, bg="#f0f0f0")
@@ -519,6 +554,42 @@ class gui:
         else:
             self.status_label.config(text="No image loaded")
 
+    def show_help(self):
+        """Displays a window listing all keyboard shortcuts."""
+        help_window = Toplevel(self.root)
+        help_window.title("Keyboard Shortcuts")
+        help_window.geometry("400x400")
+        help_window.resizable(False, False)
+
+        # Title
+        Label(help_window, text="Keyboard Shortcuts", font=("Helvetica", 14, "bold")).pack(pady=10)
+
+        # Frame for shortcuts
+        shortcuts_frame = Frame(help_window)
+        shortcuts_frame.pack(padx=10, pady=5, fill="both")
+
+        # List of shortcuts
+        shortcuts = [
+            ("Ctrl+O", "Open Image", "Opens a new image file"),
+            ("Ctrl+S", "Save", "Saves the current image"),
+            ("Ctrl+Q", "Exit", "Closes the application"),
+            ("Ctrl+Z", "Undo", "Reverts the last operation"),
+            ("Ctrl+Y", "Redo", "Restores the last undone operation"),
+            ("Ctrl+Shift+R", "Reset Image", "Resets to the original image"),
+            ("Ctrl+C", "Crop Image", "Starts cropping mode"),
+            ("Ctrl+R", "Resize Image", "Prompts for new dimensions"),
+            ("Ctrl+G", "Grayscale", "Converts image to grayscale"),
+        ]
+
+        # Display shortcuts in a grid
+        for i, (shortcut, action, description) in enumerate(shortcuts):
+            Label(shortcuts_frame, text=shortcut, font=("Helvetica", 10), anchor="w").grid(row=i, column=0, padx=5, pady=2, sticky="w")
+            Label(shortcuts_frame, text=action, font=("Helvetica", 10), anchor="w").grid(row=i, column=1, padx=5, pady=2, sticky="w")
+            Label(shortcuts_frame, text=description, font=("Helvetica", 10), anchor="w").grid(row=i, column=2, padx=5, pady=2, sticky="w")
+
+        # Close button
+        Button(help_window, text="Close", command=help_window.destroy, font=("Helvetica", 10)).pack(pady=10)
+
 root = Tk()
 app = gui(root)
 
@@ -556,9 +627,9 @@ def reset_image_event(event):
     """Handles Ctrl+Shift+R to reset the image."""
     app.image_mgr.reset_image()
 
-def new_image_event(event):
-    """Handles Ctrl+N (not implemented)."""
-    app.status_label.config(text="New image functionality not implemented")
+def grayscale_event(event):
+    """Handles Ctrl+G to convert the image to grayscale."""
+    app.image_mgr.convert_to_grayscale()
 
 root.bind("<Control-o>", open_image_event)
 root.bind("<Control-s>", save_image_event)
@@ -568,8 +639,7 @@ root.bind("<Control-y>", redo_event)
 root.bind("<Control-r>", resize_image_event)
 root.bind("<Control-c>", crop_image_event)
 root.bind("<Control-Shift-R>", reset_image_event)
-root.bind("<Control-n>", new_image_event)
-
+root.bind("<Control-g>", grayscale_event)
 
 
 
